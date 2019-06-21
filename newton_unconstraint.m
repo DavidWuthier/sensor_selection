@@ -68,5 +68,5 @@ end
 
 H_eig = eig(H); %Convexity tjeck (all eigenvalues should be nonnegative);
 
-% [x_min, f_min] = fminunc(func,x0);
-% disp(['x_min=(',num2str(xk'),'), ','f(x_min)=', num2str(f_min)]);
+[x_min, f_min] = fminunc(func,x0);
+disp(['x_min=(',num2str(xk'),'), ','f(x_min)=', num2str(f_min)]);
