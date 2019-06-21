@@ -15,9 +15,9 @@ PD = min(eig(par.P),[],1); %Convexity tjeck (all eigenvalues should be nonnegati
 % Parameters describing equality constraints;
 par.A = [1  1 1;
          1 -1 0];
-par.b = [5 0];
+par.b = [10 0];
 
-x0 = [2 2 1]'; % Initial guess;
+x0 = [4 4 2]'; % Initial guess;
 
 if (par.A*x0~=par.b) 
     disp('Initial guess is not feasible');
@@ -25,7 +25,7 @@ if (par.A*x0~=par.b)
 end
 
 % Parameters used in the newton algorithm;
-par.Kn = 1000; % maximal number of newton iterations;
+par.Kn = 500; % maximal number of newton iterations;
 par.Kb = 100; % maximal number of line search iterations;
 par.alpha = 0.25;
 par.beta  = 0.50; 
@@ -38,7 +38,7 @@ hess = @(x) fun.quadratic_hess(x,par);
 
 xk=x0;
 Kn=0;
-while Kn<par.Kn
+while (Kn<par.Kn)&&(norm<par.eps2)
 % Evaluate the gradient (J) and hessian (H) at xk;
 J=grad(xk);
 H=hess(xk);
@@ -54,6 +54,9 @@ L = chol(H,'upper'); % Cholesky factoriazation of the hessian, H;
 FORMa = L\(L'\par.A');
 FORMb = L\(L'\J);
 
+% inv_LL = L\(L'\);
+% inv_H  = H^-1;
+
 % step 2 (form the Schur complement, S);
 S = -par.A*FORMa;
 
@@ -65,17 +68,16 @@ w  = -U\(U'\(par.A*FORMb));
 Hv = -par.A'*w-J;
 xnt  = L\(L'\Hv); % Descent direction;
 
-S1  = -par.A*(H^-1)*par.A';
-Sw1 = par.A*(H^-1)*J;
-w1  = (S1^-1)*Sw1;
-Hv1 = -par.A'*w1-J;
-xnt= (H^-1)*Hv1;
-
+% S1  = -par.A*(H^-1)*par.A';
+% Sw1 = par.A*(H^-1)*J;
+% w1  = (S1^-1)*Sw1;
+% Hv1 = -par.A'*w1-J;
+% xnt1= (H^-1)*Hv1;
 
 dnt2 = xnt'*(L\(L'\xnt)); % Squared newton decrement;
 
 %% 2. Stopping criterion;
-if dnt2/2<par.eps
+if (dnt2/2<par.eps)&&(
     break
 end
 Kn=Kn+1; % number of newton iterations;
@@ -91,8 +93,10 @@ end
 
 %% 4. Update x;
 xk = xk + t*xnt;
-f_xk = func(xk);
 
+norm=max(t*xnt,[],1); % Used as an additional stopping criterion (stop if very little change in t*xnt);
+
+f_xk = func(xk);
 %% Print;
 disp('-----------------------------------------------------------------------');
 disp(['Number of newton iterations, Kn=', num2str(Kn)]);
