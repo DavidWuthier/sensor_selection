@@ -39,7 +39,8 @@ hess = @(x) fun.quadratic_hess(x,par);
 
 xk=x0;
 Kn=0;
-while (Kn<par.Kn)&&(norm>par.norm)
+norm=1;
+while (Kn<par.Kn)
 % Evaluate the gradient (J) and hessian (H) at xk;
 J=grad(xk);
 H=hess(xk);
@@ -79,6 +80,7 @@ dnt2 = xnt'*(L\(L'\xnt)); % Squared newton decrement;
 
 %% 2. Stopping criterion;
 if (dnt2/2<par.eps)
+    disp('stopping criterion met');
     break
 end
 Kn=Kn+1; % number of newton iterations;
