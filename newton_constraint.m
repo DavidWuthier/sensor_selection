@@ -30,6 +30,7 @@ par.Kb = 100; % maximal number of line search iterations;
 par.alpha = 0.25;
 par.beta  = 0.50; 
 par.eps   = 1e-12; % tolerance level;
+par.norm  = 1e-12;
 
 %% Initialize objective function and the corresponding gradient and hessian;
 func = @(x) fun.quadratic(x,par);
@@ -38,7 +39,7 @@ hess = @(x) fun.quadratic_hess(x,par);
 
 xk=x0;
 Kn=0;
-while (Kn<par.Kn)&&(norm<par.eps2)
+while (Kn<par.Kn)&&(norm>par.norm)
 % Evaluate the gradient (J) and hessian (H) at xk;
 J=grad(xk);
 H=hess(xk);
@@ -77,7 +78,7 @@ xnt  = L\(L'\Hv); % Descent direction;
 dnt2 = xnt'*(L\(L'\xnt)); % Squared newton decrement;
 
 %% 2. Stopping criterion;
-if (dnt2/2<par.eps)&&(
+if (dnt2/2<par.eps)
     break
 end
 Kn=Kn+1; % number of newton iterations;
