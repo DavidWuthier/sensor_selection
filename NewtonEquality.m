@@ -30,11 +30,15 @@ J=grad(xk);
 H=hess(xk);
 
 %% 1. Descent direction;
-% Algorithm 10.3: Solving the KKT system by block elimination 
-% Note that the Hessian, H, must be positive definite;
+% Algorithm 10.3: Solving the KKT system by block elimination;
 
 % step 1;
-L = chol(H,'upper'); % Cholesky factoriazation of the hessian, H;
+Q = eye(size(Aeq,1),size(Aeq,1));
+
+UL = H + Aeq'*Q*Aeq; 
+UR = J + Aeq'*Q*Aeq;
+
+L = chol(UL,'upper'); % Cholesky factoriazation of the hessian, H;
 
 FORMa = L\(L'\Aeq');
 FORMb = L\(L'\J);

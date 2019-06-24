@@ -1,6 +1,8 @@
 %% Clear memory;
 clear all; clc; beep off;
 
+rng(34);
+
 par.m = 1000; % number of linear measurements;
 par.n = 10; % dimensions of x;
 par.k = 50; % subset of m that minimizes the volume;;
@@ -16,14 +18,20 @@ z0 = par.k/par.m * ones(par.m,1);
 %% Initialize objective function and the corresponding gradient and hessian;
 obj = @(x) fun.LogVolume(x.par);
 
-func = @(x) fun.ApproxLogVolume(x,par);
-grad = @(x) fun.ApproxLogVolume_grad(x,par);
-hess = @(x) fun.ApproxLogVolume_hess(x,par);
+func = @(x) -fun.ApproxLogVolume(x,par);
+grad = @(x) -fun.ApproxLogVolume_grad(x,par);
+hess = @(x) -fun.ApproxLogVolume_hess(x,par);
 
 f_z0 = func(z0);
 g_z0 = grad(z0);
 h_z0 = hess(z0);
 
+I = eye(5,5);
+
+det_hes=det(h_z0);
+eig_min=min(eig(h_z0),1);
+
+eig_I = eig(I);
 %% Parameters describing equality constraints (Ax=b);
 A = ones(1,par.m);
 b = par.k;
@@ -42,6 +50,11 @@ opt.eps   = 1e-12; % stopping criterion;
 opt.norm  = 1e-12; % stopping criterion for search direction;
 
 [zk, f_zk] = NewtonEquality(z0,func,grad,hess,A,b,opt); % Newton algorithm;
+
+AA = [f_zk zk];
+
+[~,idx] = sort(AA(:,1)); % sort just the first column
+sorted = AA(idx,:);   % sort the whole matrix using the sort indices
 
 %% Compare to matlab's solver (fmincon);
 % CSxk = A*zk-b; % tjeck constraints;
