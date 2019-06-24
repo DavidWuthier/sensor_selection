@@ -1,17 +1,18 @@
 %% Clear memory;
 clear all; clc; beep off;
 
-rng(34);
+rng(32);
 
-par.m = 1000; % number of linear measurements;
+par.m = 40; % number of linear measurements;
 par.n = 10; % dimensions of x;
-par.k = 50; % subset of m that minimizes the volume;;
+par.k = 4; % subset of m that minimizes the volume;;
 
 par.sigma = 1; % standard deviation of v_i (iidN);
 
-par.kappa = 1;
+par.kappa = 0.01;
 
-par.a = normrnd(1,2,[par.n par.m]); % simulate (n*m) observations;
+% par.a = exp(normrnd(1,2,[par.n par.m])); % simulate (n*m) observations;
+par.a = rand(par.n,par.m);
 
 z0 = par.k/par.m * ones(par.m,1);
 
@@ -26,12 +27,16 @@ f_z0 = func(z0);
 g_z0 = grad(z0);
 h_z0 = hess(z0);
 
-I = eye(5,5);
-
 det_hes=det(h_z0);
-eig_min=min(eig(h_z0),1);
+eig_min=min(eig(h_z0),[],1);
 
-eig_I = eig(I);
+% eps = 0.001;
+% g_z0_num = derivative.num_grad(func,z0,eps);
+% h_z0_num = derivative.num_hess(func,z0,eps);
+% 
+% det_hes_num=det(h_z0_num);
+% eig_min_num=min(eig(h_z0_num),[],1);
+
 %% Parameters describing equality constraints (Ax=b);
 A = ones(1,par.m);
 b = par.k;
@@ -43,23 +48,25 @@ b0 = A*z0;
 opt.Kn = 500; % maximal number of newton iterations;
 opt.Kb = 100; % maximal number of line search iterations;
 
-opt.alpha = 0.25; % alpha in (0.0; 0.5)
+opt.alpha = 0.1; % alpha in (0.0; 0.5)
 opt.beta  = 0.50; % beta in (0.5; 1.0)
 
 opt.eps   = 1e-12; % stopping criterion;
 opt.norm  = 1e-12; % stopping criterion for search direction;
 
-[zk, f_zk] = NewtonEquality(z0,func,grad,hess,A,b,opt); % Newton algorithm;
+tic;
+[zk, f_zk, w, J, H, t, xnt, dnt2] = NewtonEquality(z0,func,grad,hess,A,b,opt); % Newton algorithm;
+toc;
 
-AA = [f_zk zk];
+aa = J + A'*w;
 
-[~,idx] = sort(AA(:,1)); % sort just the first column
-sorted = AA(idx,:);   % sort the whole matrix using the sort indices
+AA=zk;
+[BB,id_zk] = sort(AA,'descend'); % sort just the first column
 
 %% Compare to matlab's solver (fmincon);
-% CSxk = A*zk-b; % tjeck constraints;
-% CSx0 = A*z0-b; % initial guess;
-% 
+CSxk = A*zk-b; % tjeck constraints;
+CSx0 = A*z0-b; % initial guess;
+
 % [z_min, f_min] = fmincon(func,z0,[],[],A,b);
 % disp(['xk^T=(',num2str(zk'),'), ','f(xk)=', num2str(f_zk)]);
 % disp(['x_min=(',num2str(z_min'),'), ','f(x_min)=', num2str(f_min)]);

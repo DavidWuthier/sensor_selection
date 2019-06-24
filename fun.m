@@ -33,7 +33,7 @@ classdef fun
         function v = ApproxLogVolume(z,par)
             cov=fun.cov(z,par);
             
-            if cov==0
+            if (max(z,[],1)>1) || (min(z,[],1)<0)
                 v=-10e6; % if cov is singular;
             else
             v = log(det(cov)) ...
@@ -56,12 +56,26 @@ classdef fun
         function h = ApproxLogVolume_hess(z,par)
             cov=fun.cov(z,par);
             L = chol(cov,'upper'); % Cholesky factoriazation;
+            aL = L'\par.a;
             
-            d = 1/(z.^2) + 1/((1-z).^2);
+            d = (1/(z.*z)) + (1/((1-z).*(1-z)));
+            aWa = aL'*aL;
             
-            h = par.a'*(L\(L'\par.a)).^2 ...
-                - par.kappa*diag(d);
+            h = - aWa.*aWa - par.kappa*diag(d);
             
+        end
+        
+        function unity = RestrictToUnity(xk,xnt,t)
+            unity = xnt;
+            for i=1:size(xk,1)
+                if xk(i)+t*xnt(i) > 1
+                    unity(i) = (1-xk(i))/t;    
+                end
+                if xk(i)+t*xnt(i)<0
+                    unity(i) = -xk(i)/t;
+                end
+            end
+        
         end
         
     end

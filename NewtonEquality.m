@@ -1,4 +1,4 @@
-function [xk, f_xk, J, H, t, xnt, dnt2] = NewtonEquality(xk,func,grad,hess,Aeq,beq,opt)
+function [xk, f_xk, w, J, H, t, xnt, dnt2] = NewtonEquality(xk,func,grad,hess,Aeq,beq,opt)
 %% Input variables;
 % xk: initial guess for optimization problem (need to be feasible);
 % func: objective function;
@@ -25,6 +25,13 @@ end
 Kn=0;
 norm=1;
 while (Kn<opt.Kn)
+
+if (abs(Aeq*xk-beq)>opt.eps) 
+    f_xk = func(xk);
+    disp('equality constraint is not met');
+    return
+end    
+    
 % Evaluate the gradient (J) and hessian (H) at xk;
 J=grad(xk);
 H=hess(xk);
@@ -36,9 +43,9 @@ H=hess(xk);
 Q = eye(size(Aeq,1),size(Aeq,1));
 
 UL = H + Aeq'*Q*Aeq; 
-UR = J + Aeq'*Q*Aeq;
+% UR = J + Aeq'*Q*Aeq;
 
-L = chol(UL,'upper'); % Cholesky factoriazation of the hessian, H;
+L = chol(H,'upper'); % Cholesky factoriazation of the hessian, H;
 
 FORMa = L\(L'\Aeq');
 FORMb = L\(L'\J);
@@ -75,8 +82,21 @@ Kb=0;
 while (func(xk+t*xnt) > func(xk) + opt.alpha*t*J'*xnt)&&(Kb<opt.Kb)
     t=opt.beta*t; % update t;
     Kb=Kb+1; % number of line search iterations;
+    
 %     disp(['Kb=',num2str(Kb),' t=',num2str(t), ' criterion=',num2str(func(xk+t*xnt) - ( func(xk) + opt.alpha*t*J'*xnt ))]);
 end
+
+    if max(xk+t*xnt,[],1)>1 
+        f_xk = func(xk);
+        disp('Out of unit interval, xk>1');
+        return
+    end
+    if min(xk+t*xnt,[],1)<0
+        f_xk = func(xk);
+        disp('Out of unit interval, xk<0');
+        return
+    end
+    
 
 %% 4. Update x;
 xk = xk + t*xnt;
@@ -89,8 +109,13 @@ disp('-----------------------------------------------------------------------');
 disp(['Number of newton iterations, Kn=', num2str(Kn)]);
 disp(['Number of line search iterations, Kb=', num2str(Kb),', t=', num2str(t)]);
 disp(['Evaluate stopping criterion, dnt2/2=', num2str(dnt2/2)]);
-disp(['xk^T=(',num2str(xk'),'), ','f(xk)=', num2str(f_xk)]);
+disp(['f(xk)=', num2str(f_xk)]);
 disp('-----------------------------------------------------------------------');
 end
+
+    if Kn == opt.Kn
+        disp(['Maximum number of iterations reached: ', num2str(Kn), ' iterations']);
+        return
+    end
 
 end
