@@ -11,41 +11,44 @@ clc
 % h1 = matlabFunction(diff(t,ptx), 'File', 'h1');
 % h2 = matlabFunction(diff(t,pty), 'File', 'h2');
 
-ns = 40;
+m = 40;
 ptx = 0.1;
 pty = 0.0;
 
-p = (2*pi)/ns*(0:ns-1);
+p = (2*pi)/m*(0:m-1);
 
-% psx = (1 + p).*cos(p);
-% psy = (1 + p).*sin(p);
 psx = cos(p);
 psy = sin(p);
-psx(1:10) = 0.5*psx(1:10);
-psy(1:10) = 0.5*psy(1:10);
 ts = p + pi;
-A = zeros(ns,2);
-a = zeros(2,2,ns);
+A = zeros(m,2);
+a = zeros(2,2,m);
 
-for k = 1:ns
+for k = 1:m
     A(k,1) = h1(psx(k), psy(k), ptx, pty, ts(k));
     A(k,2) = h2(psx(k), psy(k), ptx, pty, ts(k));
     a(:,:,k) = A(k,:).' * A(k,:);
 end
 
 k = 4;
+h = 0.01 *2/m;
 
+tic
 cvx_begin
-    variable z(ns)
-    expression s(2, 2, ns)
-    for i = 1:ns
-        s(:,:,i) = z(i) * A(i,:).' * A(i,:);
+    variable z(m)
+    expressions s1(2, 2, m) s2(m)
+    
+    for i = 1:m
+        s1(:,:,i) = z(i) * A(i,:).' * A(i,:);
+        s2(i) = log(z(i)) + log(1 - z(i));
     end
-    maximize(log_det(sum(s, 3)))
+    
+    maximize(log_det(sum(s1, 3)) + h*sum(s2))
+    
     subject to
-        ones(1,ns)*z == k
+        ones(1,m)*z == k
         0 <= z <= 1
 cvx_end
+toc
 
 figure
 quiver(psx, psy, cos(ts), sin(ts), 0.2)
