@@ -55,7 +55,7 @@ S = -Aeq*FORMa;
 
 % step 3 (determine w - the dual variable);
 U = chol(-S,'upper'); % Cholesky factoriazation of the Schur complement;
-w  = -U\(U'\(Aeq*FORMb));
+w = -U\(U'\(Aeq*FORMb));
 
 % step 4 (finale step of algorithm 10.3 - determining the newton step, xnt);
 Hv = -Aeq'*w-J;

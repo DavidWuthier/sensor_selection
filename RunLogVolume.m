@@ -1,18 +1,19 @@
 %% Clear memory;
 clear all; clc; beep off;
 
-rng(32);
+rng(34);
 
 par.m = 40; % number of linear measurements;
-par.n = 10; % dimensions of x;
+par.n = 2; % dimensions of x;
 par.k = 4; % subset of m that minimizes the volume;;
 
-par.sigma = 1; % standard deviation of v_i (iidN);
+par.kappa = 0.01*par.n/par.m;
 
-par.kappa = 0.01;
+% par.a = rand(par.n,par.m);
+% Ap = par.a;
 
-% par.a = exp(normrnd(1,2,[par.n par.m])); % simulate (n*m) observations;
-par.a = rand(par.n,par.m);
+load('Aprime.mat');
+par.a=Aprime;
 
 z0 = par.k/par.m * ones(par.m,1);
 
@@ -30,12 +31,12 @@ h_z0 = hess(z0);
 det_hes=det(h_z0);
 eig_min=min(eig(h_z0),[],1);
 
-% eps = 0.001;
-% g_z0_num = derivative.num_grad(func,z0,eps);
-% h_z0_num = derivative.num_hess(func,z0,eps);
-% 
-% det_hes_num=det(h_z0_num);
-% eig_min_num=min(eig(h_z0_num),[],1);
+eps = 0.001;
+g_z0_num = derivative.num_grad(func,z0,eps);
+h_z0_num = derivative.num_hess(func,z0,eps);
+
+det_hes_num=det(h_z0_num);
+eig_min_num=min(eig(h_z0_num),[],1);
 
 %% Parameters describing equality constraints (Ax=b);
 A = ones(1,par.m);
@@ -55,13 +56,10 @@ opt.eps   = 1e-12; % stopping criterion;
 opt.norm  = 1e-12; % stopping criterion for search direction;
 
 tic;
-[zk, f_zk, w, J, H, t, xnt, dnt2] = NewtonEquality(z0,func,grad,hess,A,b,opt); % Newton algorithm;
+[zk, f_zk, w, J_zk, H_zk, t, xnt, dnt2] = NewtonEquality(z0,func,grad,hess,A,b,opt); % Newton algorithm;
 toc;
 
-aa = J + A'*w;
-
-AA=zk;
-[BB,id_zk] = sort(AA,'descend'); % sort just the first column
+aa = J_zk + A'*w;
 
 %% Compare to matlab's solver (fmincon);
 CSxk = A*zk-b; % tjeck constraints;
