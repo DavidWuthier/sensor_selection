@@ -14,12 +14,12 @@ clc
 % # of sensor
 m = 40;
 % # of target points
-np = 20;
+np = 1;
 % Time
 t = 0:(2*pi)/np:2*pi*(1-1/np);
 % # target points
-ptx = 0.2*cos(t);
-pty = 0.2*sin(2*t);
+ptx = 0.1;% 0.2*cos(t);
+pty = 0;% 0.2*sin(2*t);
 % Azimut of cameras
 p = (2*pi)/m*(0:m-1);
 % Camera positions
