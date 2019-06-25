@@ -1,3 +1,4 @@
+%%
 
 close all
 clear
@@ -73,14 +74,15 @@ psl = log(det(sum(s1, 3)))
 
 e = (psl - pwc)/pwc
 
+%%
+
 figure
-quiver(psx, psy, cos(ts), sin(ts))
+quiver(psx, psy, cos(ts), sin(ts), 'Color', [0.5 0.5 0.5], 'LineWidth', 2)
 hold on
 grid on
 axis square
-plot(ptx, pty, 'ro')
-quiver(psx, psy, z.'.*cos(ts), z.'.*sin(ts), 'r')
-plot(psx(zl), psy(zl), 'ko')
-
+plot(ptx, pty, 'ro', 'LineWidth', 2)
+quiver(psx, psy, z.'.*cos(ts), z.'.*sin(ts), 'b', 'LineWidth', 2)
+quiver(psx(zl), psy(zl), cos(ts(zl)), sin(ts(zl)), 0.55, 'g',  'LineWidth', 2)
 
 
