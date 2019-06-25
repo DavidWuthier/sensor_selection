@@ -15,12 +15,12 @@ clc
 % # of sensor
 m = 40;
 % # of target points
-np = 1;
+np = 20;
 % Time
 t = 0:(2*pi)/np:2*pi*(1-1/np);
 % # target points
-ptx = 0.1;% 0.2*cos(t);
-pty = 0;% 0.2*sin(2*t);
+ptx = 0.3*cos(t);
+pty = 0.3*sin(2*t);
 % Azimut of cameras
 p = (2*pi)/m*(0:m-1);
 % Camera positions
@@ -76,13 +76,19 @@ e = (psl - pwc)/pwc
 
 %%
 
+s = 0.5;
+c = [0 0.4470 0.7410];
+
 figure
-quiver(psx, psy, cos(ts), sin(ts), 'Color', [0.5 0.5 0.5], 'LineWidth', 2)
 hold on
 grid on
 axis square
+quiver(psx, psy, s*cos(ts), s*sin(ts), 'Color', [0.7 0.7 0.7], 'LineWidth', 2, 'AutoScale', 'off', 'MaxHeadSize', 0.1)
 plot(ptx, pty, 'ro', 'LineWidth', 2)
-quiver(psx, psy, z.'.*cos(ts), z.'.*sin(ts), 'b', 'LineWidth', 2)
-quiver(psx(zl), psy(zl), cos(ts(zl)), sin(ts(zl)), 0.55, 'g',  'LineWidth', 2)
+quiver(psx(zl), psy(zl), s*cos(ts(zl)), s*sin(ts(zl)), 'g', 'LineWidth', 2, 'AutoScale', 'off', 'MaxHeadSize', 0.2)
+quiver(psx, psy, s*z.'.*cos(ts), s*z.'.*sin(ts), 'b', 'LineWidth', 2, 'ShowArrowHead', 'off', 'AutoScale', 'off')
+xlabel('p_x [m]')
+ylabel('p_y [m]')
+legend('locations', 'target', 'selected', 'z')
 
 
