@@ -14,7 +14,7 @@ clc
 % # of sensor
 m = 40;
 % # of target points
-np = 2;
+np = 1;
 % Time
 t = 0:(2*pi)/np:2*pi*(1-1/np);
 % # target points
