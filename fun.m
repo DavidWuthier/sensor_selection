@@ -34,7 +34,7 @@ classdef fun
             cov=fun.cov(z,par);
             
             if (max(z,[],1)>1) || (min(z,[],1)<0)
-                v=-10e6; % if cov is singular;
+                v=-10e6;
             else
             v = log(det(cov)) ...
               + par.kappa*sum(log(z) + log(1-z),1);

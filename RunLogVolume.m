@@ -1,11 +1,11 @@
 %% Clear memory;
-clear all; clc; beep off;
+close all; clear all; clc; beep off;
 
 rng(34);
 
-par.m = 400; % number of linear measurements;
+par.m = 1000; % number of linear measurements;
 par.n = 10; % dimensions of x;
-par.k = 40; % subset of m that minimizes the volume;;
+par.k = 50; % subset of m that minimizes the volume;;
 
 par.kappa = 0.01*par.n/par.m;
 
@@ -55,22 +55,22 @@ opt.beta  = 0.50; % beta in (0.5; 1.0)
 opt.eps   = 1e-6; % stopping criterion;
 opt.norm  = 1e-6; % stopping criterion for search direction;
 
-% tic;
-% [zk, f_zk, w, J_zk, H_zk, t, xnt, dnt2] = NewtonEquality(z0,func,grad,hess,A,b,opt); % Newton algorithm;
-% toc;
-% 
-% CSzk = A*zk-b; % tjeck constraints;
+tic;
+[z, f_z, w] = NewtonEquality(z0,func,grad,hess,A,b,opt); % Newton algorithm;
+toc;
+
+CSzk = A*z-b; % tjeck constraints;
 CSz0 = A*z0-b; % initial guess;
 
-
 %% Compare to matlab's solver (fmincon);
-
+% tic;
 % [z_min, f_min] = fmincon(func,z0,[],[],A,b);
-% disp(['xk^T=(',num2str(zk'),'), ','f(xk)=', num2str(f_zk)]);
-% disp(['x_min=(',num2str(z_min'),'), ','f(x_min)=', num2str(f_min)]);
+% toc;
+% disp(['z^T=(',num2str(z'),'), ','f(z)=', num2str(f_z)]);
+% disp(['z_min=(',num2str(z_min'),'), ','f(z_min)=', num2str(f_min)]);
 % 
-% z_diff = zk - z_min;
-% f_diff = f_zk - f_min;
+% z_diff = z - z_min;
+% f_diff = f_z - f_min;
 % 
 % disp(['x_diff=(',num2str(z_diff'),'), ','f_diff=', num2str(f_diff)]);
 

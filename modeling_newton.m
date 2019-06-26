@@ -5,9 +5,9 @@ clc
 
 rng(34);
 
-par.m = 1000; % number of linear measurements;
+par.m = 100; % number of linear measurements;
 par.n = 1; % dimensions of x;
-par.k = 50; % subset of m that minimizes the volume;;
+par.k = 5; % subset of m that minimizes the volume;;
 
 par.kappa = 0.01*par.n/par.m;
 
@@ -86,31 +86,31 @@ opt.eps   = 1e-6; % stopping criterion;
 opt.norm  = 1e-6; % stopping criterion for search direction;
 
 tic;
-[z, f_zk, w, J_zk, H_zk, t, xnt, dnt2] = NewtonEquality(z0,func,grad,hess,Aeq,beq,opt); % Newton algorithm;
+[z, f_z, w, J_zk, H_zk, t, xnt, dnt2] = NewtonEquality(z0,func,grad,hess,Aeq,beq,opt); % Newton algorithm;
 z_newton = z;
 toc;
 
 % CSzk = Aeq*z-beq; % tjeck constraints;
 CSz0 = Aeq*z0-beq; % initial guess;
 
-% tic;
-% cvx_begin
-%     variable z(par.m)
-%     expressions s1(2*par.n,2*par.n,par.m) s2(par.m)
-%     
-%     for i = 1:par.m
-%         s1(:,:,i) = z(i) * A(:,:,i).' * A(:,:,i);
-%         s2(i) = log(z(i)) + log(1 - z(i));
-%     end
-%     
-%     maximize(log_det(sum(s1, 3)) + par.kappa*sum(s2))
-%     
-%     subject to
-%         ones(1,par.m)*z == par.k
-% cvx_end
-% z_CVX = z;
-% toc;
-% tjeck = [z_newton z_CVX z_newton-z_CVX];
+tic;
+cvx_begin
+    variable z(par.m)
+    expressions s1(2*par.n,2*par.n,par.m) s2(par.m)
+    
+    for i = 1:par.m
+        s1(:,:,i) = z(i) * A(:,:,i).' * A(:,:,i);
+        s2(i) = log(z(i)) + log(1 - z(i));
+    end
+    
+    maximize(log_det(sum(s1, 3)) + par.kappa*sum(s2))
+    
+    subject to
+        ones(1,par.m)*z == par.k
+cvx_end
+z_CVX = z;
+toc;
+tjeck = [z_newton z_CVX z_newton-z_CVX];
 
 s1 = fun.cov(z,par);
 
@@ -170,4 +170,5 @@ xlabel('Newton iterations, k')
 
 print -deps NewtonFig
 
-
+obj_newton = func(z_newton);
+obj_CVX = func(z_CVX);
