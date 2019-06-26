@@ -23,16 +23,11 @@ if (abs(Aeq*xk-beq)>opt.eps)
 end
 
 Kn=0;
-norm=1;
-while (Kn<opt.Kn)
-
-if (abs(Aeq*xk-beq)>opt.eps) 
-    f_xk = func(xk);
-    disp('equality constraint is not met');
-    return
-end    
+t=1;
+while (Kn<opt.Kn)  
     
 % Evaluate the gradient (J) and hessian (H) at xk;
+f_xk=func(xk);
 J=grad(xk);
 H=hess(xk);
 
@@ -40,11 +35,6 @@ H=hess(xk);
 % Algorithm 10.3: Solving the KKT system by block elimination;
 
 % step 1;
-Q = eye(size(Aeq,1),size(Aeq,1));
-
-UL = H + Aeq'*Q*Aeq; 
-% UR = J + Aeq'*Q*Aeq;
-
 L = chol(H,'upper'); % Cholesky factoriazation of the hessian, H;
 
 FORMa = L\(L'\Aeq');
@@ -65,12 +55,10 @@ dnt2 = xnt'*H*xnt; % Squared newton decrement;
 
 %% 2. Stopping criterion;
 if (dnt2/2<opt.eps)
-    f_xk = func(xk);
     disp(['stopping criterion met: ', num2str(dnt2/2)]);
     break
 end
-if (abs(norm)<opt.norm)
-    f_xk = func(xk);
+if (abs(t)<opt.norm)
     disp(['Stopping criterion not met: ', num2str(dnt2/2),' t=',num2str(t)]);
     break
 end
@@ -79,31 +67,16 @@ Kn=Kn+1; % number of newton iterations;
 %% 3. Line search by backtracking;
 t=1;
 Kb=0;
-while (func(xk+t*xnt) > func(xk) + opt.alpha*t*J'*xnt)&&(Kb<opt.Kb)
+while (func(xk+t*xnt) > f_xk + opt.alpha*t*J'*xnt)&&(Kb<opt.Kb)
     t=opt.beta*t; % update t;
     Kb=Kb+1; % number of line search iterations;
-    
 %     disp(['Kb=',num2str(Kb),' t=',num2str(t), ' criterion=',num2str(func(xk+t*xnt) - ( func(xk) + opt.alpha*t*J'*xnt ))]);
-end
-
-    if max(xk+t*xnt,[],1)>1 
-        f_xk = func(xk);
-        disp('Out of unit interval, xk>1');
-        return
-    end
-    if min(xk+t*xnt,[],1)<0
-        f_xk = func(xk);
-        disp('Out of unit interval, xk<0');
-        return
-    end
-    
+end   
 
 %% 4. Update x;
 xk = xk + t*xnt;
-
-norm=t; % Used as an additional stopping criterion (stop if t close to zero);
-
 f_xk = func(xk);
+
 %% Print;
 disp('-----------------------------------------------------------------------');
 disp(['Number of newton iterations, Kn=', num2str(Kn)]);

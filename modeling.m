@@ -14,7 +14,7 @@ clc
 % # of sensor
 m = 40;
 % # of target points
-np = 1;
+np = 2;
 % Time
 t = 0:(2*pi)/np:2*pi*(1-1/np);
 % # target points
@@ -39,7 +39,7 @@ end
 
 k = 4;
 h = 0.01 *2/m;
-
+%%
 cvx_begin
     variable z(m)
     expressions s1(2*np,2*np,m) s2(m)
