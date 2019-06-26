@@ -26,7 +26,7 @@ Kn=0;
 t=1;
 while (Kn<opt.Kn)  
     
-% Evaluate the gradient (J) and hessian (H) at xk;
+% Evaluate the function f_xk, the gradient (J) and hessian (H) at xk;
 f_xk=func(xk);
 J=grad(xk);
 H=hess(xk);
@@ -75,7 +75,6 @@ end
 
 %% 4. Update x;
 xk = xk + t*xnt;
-f_xk = func(xk);
 
 %% Print;
 disp('-----------------------------------------------------------------------');
